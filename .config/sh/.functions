@@ -1,0 +1,155 @@
+# POSIX shell functions.
+
+# Check if current shell is interactive by checking its current options.
+is_shell_interactive() {
+  echo "$-" | /usr/bin/grep -q i
+}
+
+# Check if the current shell is running on Apple Silicon hardware.
+is_apple_silicon() {
+  [ "$(/usr/bin/arch || true)" = "arm64" ]
+}
+
+# Log generic message to system log.
+shell_log() {
+  /usr/bin/logger -t "${SHELL}" "[${SHELL}] $*"
+}
+
+# Log debug message to system log.
+info() {
+  shell_log "info: $*"
+}
+
+# Log debug message to system log.
+debug() {
+  shell_log "debug: $*"
+}
+
+# Log warning message to system log.
+warn() {
+  shell_log "warn: $*"
+}
+
+# Log error message to system log.
+error() {
+  shell_log "error: $*"
+}
+
+# Manage the ePass2003 token for SSH operations.
+epass() {
+  # Define the maximum number of attempts and the token timeout.
+  RETRIES=5
+  TIMEOUT=7200
+
+  # Define the PKCS11 smartcard library path based on the operating system.
+  case $(uname) in
+  Linux) PKCS_LIB=/usr/lib/x86_64-linux-gnu/opensc-pkcs11.so ;;
+  Darwin) PKCS_LIB=/usr/local/lib/opensc-pkcs11.so ;;
+  *) echo "Unsupported OS" && return 1 ;;
+  esac
+
+  # Display the usage message.
+  usage() {
+    # Concisely provide the possible commands.
+    echo "Usage: epass [start|stop|restart|ssh|scp]"
+  }
+
+  # Remove the token from the SSH agent.
+  remove_token() {
+    # Erase the PKCS11 identity from the SSH agent.
+    ssh-add -e "${PKCS_LIB}"
+  }
+
+  # Add the token to the SSH agent.
+  add_token() {
+    # Return early if the token is already loaded.
+    if ssh-add -l | grep -Eq "(${PKCS_LIB}|L4 User Credential)"; then
+      echo "Token already loaded"
+      return
+    fi
+
+    # Remove an expired token silently if it exists.
+    remove_token >/dev/null 2>&1
+
+    # Keep track of the token status and the number of attempts.
+    token_status=1
+    token_count=0
+
+    # Attempt to add the token until maximum attempts are reached.
+    while [ "${token_status}" -eq 1 ] && [ "${token_count}" -lt "${RETRIES}" ]; do
+      ssh-add -t "${TIMEOUT}" -s "${PKCS_LIB}"
+      token_status=$?
+      token_count=$((token_count + 1))
+    done
+    unset TIMEOUT
+
+    # Abort after all attempts fail reaching the maximum number of tries.
+    if [ "${token_count}" -eq "${RETRIES}" ]; then
+      echo "Too many incorrect passwords, aborting" >&2
+      return 1
+    fi
+    unset RETRIES
+  }
+
+  # Handle the command line arguments.
+  case $1 in
+  --help) usage ;;
+  start | add-token | "") add_token ;;
+  stop | remove-token) remove_token ;;
+  restart | refresh)
+    remove_token
+    add_token
+    ;;
+  ssh)
+    add_token
+    shift
+    ssh "$@"
+    ;;
+  scp)
+    add_token
+    shift
+    scp "$@"
+    ;;
+  *)
+    echo "Unknown command: $1"
+    usage
+    ;;
+  esac
+  unset PKCS_LIB
+}
+
+# Check that a list of paths are allowed to be added to the search path.
+path_allowed() {
+  [ "$#" -eq 0 ] && error "No arguments provided." && return 1
+  for dir in "$@"; do
+    [ -z "${dir}" ] && error "Empty directory provided." && return 1
+    [ ! -e "${dir}" ] && error "${dir} does not exist." && return 1
+    [ ! -r "${dir}" ] && error "Cannot read ${dir}: Permission denied." && return 1
+    if [ ! -d "${dir}" ] && [ ! -L "${dir}" ]; then
+      error "${dir} is not directory or symlink." && return 1
+    fi
+    if echo ":${PATH}:" | /usr/bin/grep -q ":${dir}:"; then
+      warn "${dir} already in path." && return 1
+    fi
+  done
+  unset dir
+  return 0
+}
+
+# Add a directory to the beginning of search path without creating duplicates.
+path_prepend() {
+  for dir in "$@"; do
+    (path_allowed "${dir}") || continue
+    PATH="${dir}${PATH:+:${PATH}}"
+  done
+  unset dir
+}
+
+# Add a directory to the end of search path without creating duplicates.
+path_append() {
+  for dir in "$@"; do
+    (path_allowed "${dir}") || return 1
+    PATH="${PATH:+${PATH}:}${dir}"
+  done
+  unset dir
+}

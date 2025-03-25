@@ -1,0 +1,26 @@
+[commit]
+	gpgSign = true
+[core]
+	editor = vi
+[filter "lfs"]
+	clean = git-lfs clean -- %f
+	smudge = git-lfs smudge -- %f
+	process = git-lfs filter-process
+	required = true
+[gpg]
+	program = /opt/homebrew/bin/gpg
+	format = ssh
+[gpg "ssh"]
+	program = /Applications/1Password.app/Contents/MacOS/op-ssh-sign
+[init]
+	defaultBranch = master
+[pull]
+	ff = only
+[push]
+	autoSetupRemote = true
+[tag]
+	forceSignAnnotated = true
+[user]
+	email = user@example.com
+	name = User Example
+	signingKey = ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEXAMPLE

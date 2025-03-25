@@ -1,0 +1,8 @@
+# Activate completions.
+if command -v brew >/dev/null 2>&1; then
+  # Do not statically follow source due to dynamic path.
+  # shellcheck source=/dev/null
+  FPATH=$(brew --prefix)/share/zsh-completions:${FPATH}
+  autoload -Uz compinit
+  compinit
+fi

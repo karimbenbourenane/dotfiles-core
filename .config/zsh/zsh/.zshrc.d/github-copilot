@@ -1,0 +1,2 @@
+# Load the Copilot CLI aliases.
+eval "$(gh copilot alias -- zsh || true)"

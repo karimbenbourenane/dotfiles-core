@@ -1,0 +1,6 @@
+# Activate autosuggestions.
+brew_prefix=$(brew --prefix)
+  # Do not statically follow source due to dynamic path.
+  # shellcheck source=/dev/null
+. "${brew_prefix}"/share/zsh-autosuggestions/zsh-autosuggestions.zsh
+unset brew_prefix

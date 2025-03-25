@@ -1,0 +1,9 @@
+# POSIX shell running configuration.
+
+# Load individual configuration files.
+find "${HOME}"/.config/sh/.shrc.d/enabled -type l | while read -r file; do
+  # Do not statically follow source due to dynamic path.
+  # shellcheck source=/dev/null
+  [ -f "${file}" ] && [ -r "${file}" ] && . "${file}"
+done
+unset file
