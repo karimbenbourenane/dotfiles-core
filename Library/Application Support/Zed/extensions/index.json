@@ -4,7 +4,7 @@
       "manifest": {
         "id": "html",
         "name": "HTML",
-        "version": "0.1.5",
+        "version": "0.2.1",
         "schema_version": 1,
         "description": "HTML support.",
         "repository": "https://github.com/zed-industries/zed",
@@ -41,7 +41,8 @@
         "context_servers": {},
         "slash_commands": {},
         "indexed_docs_providers": {},
-        "snippets": null
+        "snippets": null,
+        "capabilities": []
       },
       "dev": false
     }
