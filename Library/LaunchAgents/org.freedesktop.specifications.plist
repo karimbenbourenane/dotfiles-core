@@ -1,24 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
-  <dict>
-    <key>Label</key>
-    <string>org.freedesktop.specifications</string>
-    <key>LimitLoadToSessionType</key>
-    <string>Aqua</string>
-    <key>ProgramArguments</key>
-    <array>
-      <string>/bin/sh</string>
-      <string>/Users/$USER/Library/Scripts/xdg-logout</string>
-    </array>
-    <key>RunAtLoad</key>
-    <true/>
-    <key>KeepAlive</key>
-    <false/>
-    <key>LaunchEvents</key>
-    <dict>
-      <key>com.apple.loginwindow.logout</key>
-      <true/>
-    </dict>
-  </dict>
+<dict>
+	<key>Label</key>
+	<string>org.freedesktop.specifications</string>
+	<key>LimitLoadToSessionType</key>
+	<string>Aqua</string>
+	<key>ProgramArguments</key>
+	<array>
+		<string>/bin/sh</string>
+		<string>/Users/$USER/Library/Scripts/xdg-logout</string>
+	</array>
+	<key>RunAtLoad</key>
+	<true/>
+	<key>KeepAlive</key>
+	<false/>
+	<key>LaunchEvents</key>
+	<dict>
+		<key>com.apple.loginwindow.logout</key>
+		<true/>
+	</dict>
+</dict>
 </plist>

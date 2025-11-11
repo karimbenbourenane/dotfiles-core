@@ -3,6 +3,4 @@
 
 # Erase XDG base directories that require it on final user logout.
 # Specification: https://specifications.freedesktop.org/basedir-spec/latest/
-[ -n "${TMPDIR}" ] && xdg_runtime_dir="${TMPDIR%//run/user/"$(id -u)"}"
-[ -d "${xdg_runtime_dir}" ] && rm -rf "${xdg_runtime_dir}"
-unset xdg_runtime_dir
+[ -d "${XDG_RUNTIME_DIR}" ] && rm -rf "${XDG_RUNTIME_DIR}"
